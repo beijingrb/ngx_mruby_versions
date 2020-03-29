@@ -1,0 +1,34 @@
+name: Update ngx_mruby Versions
+
+on: push
+  # schedule:
+  #   - cron: '0 0 * * *'
+
+jobs:
+  update_versions:
+    runs-on: ubuntu-latest
+    name: A job to update ngx_mruby version list
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - uses: actions/setup-ruby@v1
+      with:
+        ruby-version: '2.6'
+    - name: Install dependencies
+      run: gem i rest-client
+    - name: Get ngx_mruby versions
+      id: get-versions
+      run: ruby get_versions.rb
+    - name: Git commit
+      run: |
+        # git commit if there's any change
+        if test -n "$(git status --porcelain 2>/dev/null)"; then
+            git config --global user.email "idegorepl@gmail.com"
+            git config --global user.name "B1nj0y"
+            git add .
+            git commit -m "Update ngx_mruby version list"
+        fi
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
